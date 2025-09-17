@@ -2,7 +2,7 @@
 
 This file contains references and external resources that inform our analyses.
 
-## RElated Standards
+## Related Standards
 - [SPDX Specification](https://spdx.dev/specifications/)  
 - [CycloneDX Specification](https://cyclonedx.org/specification/overview)
 - [Package URL (purl) specification](https://github.com/package-url/purl-spec)
