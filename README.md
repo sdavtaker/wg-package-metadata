@@ -25,47 +25,47 @@ This repository is the workspace for the group. The structure is designed to kee
 ### docs/
 
 This is where we conduct most of our work.
-	•	Each metadata attribute we study will have:
-	•	A CSV summary: showing which package managers provide that attribute and how.
-	•	A text-based analysis: describing what the attribute means, how different package managers approach it, what transformations are required to read/use the data, and quality considerations.
-	•	A recommendations file: guidance for how a new package manager could implement this attribute.
-	•	Work-in-progress analyses will be stored in the `docs/drafts/` subdirectory until they mature.
+- Each metadata attribute we study will have:
+- A CSV summary: showing which package managers provide that attribute and how.
+- A text-based analysis: describing what the attribute means, how different package managers approach it, what transformations are required to read/use the data, and quality considerations.
+- A recommendations file: guidance for how a new package manager could implement this attribute.
+- Work-in-progress analyses will be stored in the `docs/drafts/` subdirectory until they mature.
 This allows ongoing discussion and visibility into how ideas evolve.
 
 ### File Naming Convention
 
 To ensure clarity and consistency, we use explicit filenames for each attribute:
-	1.	CSV Summary
-	•	<attribute>-summary.csv
-	•	Purpose: Compact overview of which package managers provide this attribute and in what form.
-	2.	Textual Analysis
-	•	<attribute>-analysis.md
-	•	Purpose: Detailed explanation of the attribute, what it means, how it is represented across package managers, what transformations may be required, and any quality considerations.
-	3.	Recommendations / Guidance
-	•	<attribute>-recommendations.md
-	•	Purpose: Guidance for how a new package manager (or one evolving its metadata) could best support this attribute.
+- CSV Summary
+  - <attribute>-summary.csv
+- Purpose: Compact overview of which package managers provide this attribute and in what form.
+- Textual Analysis
+  - <attribute>-analysis.md
+  - Purpose: Detailed explanation of the attribute, what it means, how it is represented across package managers, what transformations may be required, and any quality considerations.
+- Recommendations / Guidance
+  - <attribute>-recommendations.md
+  - Purpose: Guidance for how a new package manager (or one evolving its metadata) could best support this attribute.
 
 Example:
-	•	license-summary.csv
-	•	license-analysis.md
-	•	license-recommendations.md
+- license-summary.csv
+- license-analysis.md
+- license-recommendations.md
 
 This convention ensures that new contributors can easily understand and extend our work without needing to consult additional documentation.
 
 ### Resources
 
 This directory contains curated references we use during our analyses, such as:
-	•	Links to academic papers.
-	•	Links to package manager documentation.
-	•	Repositories with relevant examples.
-	•	Other working group or community discussions.
+- Links to academic papers.
+- Links to package manager documentation.
+- Repositories with relevant examples.
+- Other working group or community discussions.
 
 All references will be collected in a single file:
-	•	resources.md
+- resources.md
 
 ## How to Contribute
 
 We welcome contributions from anyone interested in package metadata.
-	•	Join our discussions via the [CHAOSS community](https://chaoss.community/participate/).
-	•	Open issues or pull requests to suggest attributes, resources, or corrections.
-	•	Participate in reviewing draft analyses in docs/drafts/.
+- Join our discussions via the [CHAOSS community](https://chaoss.community/participate/).
+- Open issues or pull requests to suggest attributes, resources, or corrections.
+- Participate in reviewing draft analyses in docs/drafts/.
