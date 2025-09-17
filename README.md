@@ -36,19 +36,19 @@ This allows ongoing discussion and visibility into how ideas evolve.
 
 To ensure clarity and consistency, we use explicit filenames for each attribute:
 - CSV Summary
-  - <attribute>-summary.csv
+  - `<attribute>-summary.csv`
 - Purpose: Compact overview of which package managers provide this attribute and in what form.
 - Textual Analysis
-  - <attribute>-analysis.md
+  - `<attribute>-analysis.md`
   - Purpose: Detailed explanation of the attribute, what it means, how it is represented across package managers, what transformations may be required, and any quality considerations.
 - Recommendations / Guidance
-  - <attribute>-recommendations.md
+  - `<attribute>-recommendations.md`
   - Purpose: Guidance for how a new package manager (or one evolving its metadata) could best support this attribute.
 
 Example:
-- license-summary.csv
-- license-analysis.md
-- license-recommendations.md
+- `license-summary.csv`
+- `license-analysis.md`
+- `license-recommendations.md`
 
 This convention ensures that new contributors can easily understand and extend our work without needing to consult additional documentation.
 
@@ -61,7 +61,7 @@ This directory contains curated references we use during our analyses, such as:
 - Other working group or community discussions.
 
 All references will be collected in a single file:
-- resources.md
+- `resources.md`
 
 ## How to Contribute
 
