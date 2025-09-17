@@ -1,0 +1,36 @@
+Ecosystem,Package Manager,Licenses Field Present,License Field Name/Path,Spec-Ref
+C++,Conan,Yes,"package['license']",https://docs.conan.io/2/reference/conanfile/attributes.html
+C++,Vcpkg,Yes,"package['License']",https://learn.microsoft.com/en-us/vcpkg/reference/vcpkg-json
+Clojure,Clojars:Leinengen,Yes,"licenses(version_xml).join("","")",https://github.com/technomancy/leiningen/blob/master/doc/TUTORIAL.md
+Container,Docker,No,-,https://docs.docker.com/engine/reference/builder/
+Dart,Pub,No,-,https://dart.dev/tools/pub/pubspec
+Elm,Elm,Yes,"package['license']",https://github.com/elm/compiler/blob/master/docs/elm.json/package.md
+Emacs,Elpa,No,-,https://cgit.git.savannah.gnu.org/cgit/emacs/elpa.git/plain/README
+Elixir,Mix,Yes,"repo_fallback(package[""meta""].fetch(""licenses"", []).join("","")",https://hex.pm/docs/publish
+FreeBSD,Ports,Yes,"pkg_metadata[""LICENSE""]",https://docs.freebsd.org/en/books/porters-handbook/
+Go,Go,Yes,"package[:html].css('*[data-test-id=""UnitHeader-license""]').map(&:text).join("","")",https://go.dev/ref/mod#go-mod-file
+Haskell,Cabal,Yes,"find_attribute(package[:page], ""License"")",https://cabal.readthedocs.io/en/3.4/cabal-package.html
+HPC,Spack,Yes,[],https://spack.readthedocs.io/en/latest/packaging_guide.html
+Java,Maven,Yes,"licenses(version_xml).join("","")",https://maven.apache.org/pom.html
+JavaScript,Npm,Yes,"licenses(latest_version)",https://docs.npmjs.com/cli/v8/configuring-npm/package-json
+JavaScript,Yarn,Yes,"licenses(latest_version)",https://yarnpkg.com/configuration/manifest
+Julia,Julia,Yes,"json['license']",https://pkgdocs.julialang.org/v1/creating-packages/
+Linux,apk,Yes,"pkg_metadata[""L""]",https://wiki.alpinelinux.org/wiki/APKBUILD_Reference
+Linux,dpkg,Yes,"pkg_metadata[""License""]",https://www.debian.org/doc/debian-policy/ch-controlfields.html
+Linux,rpm,Yes,"pkg_metadata[""License""]",https://rpm.org/docs/4.20.x/manual/spec.html
+macOS,Homebrew,Yes,"package['license']",https://docs.brew.sh/Formula-Cookbook
+.NET,Nuget,Yes,"item[""licenseExpression""]",https://learn.microsoft.com/en-us/nuget/reference/nuspec
+Perl,Cpan,Yes,"package.fetch(""license"", []).join("","")",https://metacpan.org/pod/CPAN::Meta::Spec
+PHP,Composer,Yes,"package['license']",https://getcomposer.org/doc/04-schema.md
+pkg-config,pkg-config,No,-,https://people.freedesktop.org/~dbn/pkg-config-guide.html
+Puppet,Puppet,Yes,"metadata[""license""]",
+Python,Conda,Yes,"pkg_metadata[""about""][""license""]",https://docs.conda.io/projects/conda-build/en/latest/resources/define-metadata.html
+Python,Pypi,Yes,"licenses(package)",https://packaging.python.org/en/latest/specifications/dependency-specifiers/#dependency-specifiers
+R,Bioconductor,Yes,"package[:properties][""License""]",https://bioconductor.org/developers/
+R,Cran,Yes,"package[:properties][""License:""]",https://cran.r-project.org/doc/manuals/R-exts.html#The-DESCRIPTION-file
+Racket,Racket,No,-,https://docs.racket-lang.org/pkg/Package_Concepts.html
+Ruby,Rubygems,Yes,"pkg_metadata.fetch(""licenses"", []).try(:join, "","")",https://guides.rubygems.org/specification-reference/
+Rust,Cargo,Yes,"latest_version[""license""]",https://doc.rust-lang.org/cargo/reference/manifest.html
+Swift,Carthage,Yes,"package['license']",https://github.com/Carthage/Carthage/blob/master/Documentation/Artifacts.md
+Swift,Cocoapods,Yes,"parse_license(package[""license""])",https://guides.cocoapods.org/syntax/podspec.html
+Swift,Swiftpm,Yes,"package['license']",https://swift.org/package-manager/
