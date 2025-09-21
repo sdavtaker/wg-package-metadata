@@ -1,0 +1,36 @@
+Ecosystem,Package Manager,Repository URL Field Present,Repository URL Field Name/Path,Spec-Ref
+C++,Conan,No,-,https://docs.conan.io/2/reference/conanfile/attributes.html
+C++,Vcpkg,Yes,package['Homepage'],https://learn.microsoft.com/en-us/vcpkg/reference/vcpkg-json
+Clojure,Clojars:Leinengen,Yes,pom.scm.url,https://github.com/technomancy/leiningen/blob/master/doc/TUTORIAL.md
+Container,Docker,Yes,Loaded via API,https://docs.docker.com/engine/reference/builder/
+Dart,Pub,Yes,pubspec.yaml['repository'],https://dart.dev/tools/pub/pubspec
+Elm,Elm,Yes,GitHub-based (name-derived),https://github.com/elm/compiler/blob/master/docs/elm.json/package.md
+Emacs,Elpa,Yes,package['Home page'],https://cgit.git.savannah.gnu.org/cgit/emacs/elpa.git/plain/README
+Elixir,Mix,Yes,metadata['links']['github'],https://hex.pm/docs/publish
+FreeBSD,Ports,Yes,package['U'],https://docs.freebsd.org/en/books/porters-handbook/
+Go,Go,Yes,Module path (URL-derived),https://go.dev/ref/mod#go-mod-file
+Haskell,Cabal,Yes,cabal['source-repository'],https://cabal.readthedocs.io/en/3.4/cabal-package.html
+HPC,Spack,Yes,package['homepages'][0],https://spack.readthedocs.io/en/latest/packaging_guide.html
+Java,Maven,Yes,pom.scm.url,https://maven.apache.org/pom.html
+JavaScript,Npm,Yes,package.json['repository'],https://docs.npmjs.com/cli/v8/configuring-npm/package-json
+JavaScript,Yarn,Yes,package.json['repository'],https://yarnpkg.com/configuration/manifest
+Julia,Julia,Yes,Package.toml['url'],https://pkgdocs.julialang.org/v1/creating-packages/
+Linux,apk,Yes,package['U'],https://wiki.alpinelinux.org/wiki/APKBUILD_Reference
+Linux,dpkg,No,-,https://www.debian.org/doc/debian-policy/ch-controlfields.html
+Linux,rpm,No,-,https://rpm.org/docs/4.20.x/manual/spec.html
+macOS,Homebrew,Yes,formula['homepage'],https://docs.brew.sh/Formula-Cookbook
+.NET,Nuget,Yes,nuspec['projectUrl'],https://learn.microsoft.com/en-us/nuget/reference/nuspec
+Perl,Cpan,Yes,metadata['resources']['repository']['web'],https://metacpan.org/pod/CPAN::Meta::Spec
+PHP,Composer,Yes,composer.json['source']['url'],https://getcomposer.org/doc/04-schema.md
+pkg-config,pkg-config,No,-,https://people.freedesktop.org/~dbn/pkg-config-guide.html
+Puppet,Puppet,Yes,metadata.json['source'],https://puppet.com/docs/puppet/latest/modules_metadata.html
+Python,Conda,Yes,package['repository_url'],https://docs.conda.io/projects/conda-build/en/latest/resources/define-metadata.html
+Python,Pypi,Yes,metadata['project_urls'] or metadata['home_page'],https://packaging.python.org/en/latest/specifications/dependency-specifiers/#dependency-specifiers
+R,Bioconductor,Yes,package['URL'],https://bioconductor.org/developers/
+R,Cran,Yes,DESCRIPTION['URL'],https://cran.r-project.org/doc/manuals/R-exts.html#The-DESCRIPTION-file
+Racket,Racket,Yes,package['source'],https://docs.racket-lang.org/pkg/Package_Concepts.html
+Ruby,Rubygems,Yes,gemspec['source_code_uri'] or gemspec['homepage_uri'],https://guides.rubygems.org/specification-reference/
+Rust,Cargo,Yes,crate['repository'],https://doc.rust-lang.org/cargo/reference/manifest.html
+Swift,Carthage,Yes,package['repository_url'],https://github.com/Carthage/Carthage/blob/master/Documentation/Artifacts.md
+Swift,Cocoapods,Yes,podspec['source']['git'],https://guides.cocoapods.org/syntax/podspec.html
+Swift,Swiftpm,Yes,Package.swift['repository_url'],https://swift.org/package-manager/
