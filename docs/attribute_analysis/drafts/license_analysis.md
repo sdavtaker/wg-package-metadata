@@ -16,6 +16,7 @@ This section provides an overview of the ecosystems and package managers reviewe
 
 ### Python Ecosystem — PyPI (pip)
 **License Information Available**: SPDX expression (in Python > 3.17), with ambiguous alternatives retained for backward compatibility
+
 **References**:
 - [Python Packaging User Guide — Dependency Specifiers](https://packaging.python.org/en/latest/specifications/dependency-specifiers/#dependency-specifiers)
 - PEP 621 ([Storing project metadata in pyproject.toml](https://peps.python.org/pep-0621/))
@@ -42,6 +43,15 @@ This section provides an overview of the ecosystems and package managers reviewe
 - [npm package.json specification – license field](https://docs.npmjs.com/cli/v10/configuring-npm/package-json#license)
 - [npm registry API reference](https://github.com/npm/registry/blob/main/docs/REGISTRY-API.md)
 
+### PHP Ecosystem — Composer (Packagist)
+**License Information Available**: Composer provides a structured `license` field in `composer.json`. It accepts an SPDX identifier, an SPDX expression using `and` or `or`, or an array of SPDX identifiers. The array form has a defined semantics of representing a sequence of `OR` alternatives, not an ambiguous list. For closed-source packages, an escape hatch is available via the value `proprietary`. Packagist surfaces this metadata on package pages and through its JSON API.
+Composer validates license values against the SPDX list using the [`composer/spdx-licenses`](https://github.com/composer/spdx-licenses) library, but publication is not blocked for invalid values.
+
+**References**:
+- [Composer schema — license field](https://getcomposer.org/doc/04-schema.md#license)
+- [composer/spdx-licenses validation library](https://github.com/composer/spdx-licenses)
+- [Packagist API reference](https://packagist.org/apidoc)
+
 ## 3. Field Analysis
 
 This section groups ecosystems according to how license information can be specified in their package metadata. The focus here is on whether the declaration is unambiguous, ambiguous, or not supported at all, along with the types of definitions that are accepted in practice.
@@ -63,6 +73,16 @@ This section groups ecosystems according to how license information can be speci
 - npm validates license values during publication but does not enforce them. Non-SPDX strings trigger warnings from the [`validate-npm-package-license`](https://github.com/kemitchell/validate-npm-package-license) library, yet packages are still accepted.
 - Ambiguity occurs when legacy packages use free-form text, custom license strings, or omit the `license` field entirely.
 - The `package.json` metadata and any `LICENSE` files included in the package tarball together define the licensing information. Registry entries reflect whatever was provided at publish time.
+
+#### PHP Ecosystem — Composer (Packagist)
+- **Accepted definitions**:
+  - SPDX license identifiers.
+  - SPDX license expressions.
+  - Escape hatch: `proprietary`, used for closed-source packages.
+  - Array of SPDX identifiers, with a documented `OR` semantics.
+- Composer validates declared licenses using the [`composer/spdx-licenses`](https://github.com/composer/spdx-licenses) library. Invalid identifiers or expressions trigger warnings but do not prevent publication.
+- Ambiguity mainly arises from legacy packages that predate SPDX adoption or that omit the `license` field entirely.
+- The `license` field in `composer.json` is the canonical source of license information, reflected consistently in Packagist and registry metadata.
 
 ### Ambiguously specified
 
@@ -128,6 +148,12 @@ License metadata is not only expressed in different formats, but also stored in 
 - **Location**: Declared in `package.json` under the `license` field. If `SEE LICENSE IN` is used, the referenced license file (typically `LICENSE` or `LICENSE.md`) is included in the published package tarball. Both the manifest and the license file are available from the npm registry and the downloaded package.
 - **Notes**: npm validates the license field format and issues warnings for invalid or non-SPDX values but does not block publication. The registry retains the license information as provided at publish time.
 
+### PHP Ecosystem — Composer (Packagist)
+- **Data type**: String containing an SPDX identifier or expression, an array of SPDX identifiers interpreted as an `OR` sequence, or the `proprietary` value used as an escape hatch for closed-source packages.
+- **License expression support**: Full support for SPDX identifiers and expressions using `and` and `or` operators, as defined in the Composer schema.
+- **Location**: Declared in `composer.json` under the `license` field. The manifest file is included in the distributed package and available through the Packagist registry and API.
+- **Notes**: Composer validates license values during package installation and publication using the `composer/spdx-licenses` library. Invalid or unrecognized values produce warnings but do not block distribution.
+
 ## 5. Access Patterns
 
 Access to license metadata varies across ecosystems. Some make it directly available from the project source or distribution, while others rely on registry infrastructure or provide no access at all.
@@ -161,6 +187,12 @@ Access to license metadata varies across ecosystems. Some make it directly avail
 - **CLI access**: The `npm view <package> license` command displays the license field as published. Other npm commands, such as `npm info`, also expose this metadata locally.
 - **Registry access**: The npm website displays license information on each package page. The license value shown corresponds to the data in the published `package.json`.
 - **API access**: The npm registry JSON API provides the license field under each package version’s metadata. Both the manifest and license files can be retrieved programmatically (`curl https://registry.npmjs.org/<package-name>`).
+
+### PHP Ecosystem — Composer (Packagist)
+- **Direct access**: License information is available in the `composer.json` file within the package source. This file is included in distributed archives and mirrors.
+- **CLI access**: The `composer show <package>` command displays the license field for installed packages. It retrieves this information from the local `composer.lock` file or the package’s manifest.
+- **Registry access**: Packagist displays license information on package pages. The values shown correspond directly to the `license` field declared in the source manifest.
+- **API access**: The Packagist API exposes license information for each package version through its JSON endpoint, for example `https://repo.packagist.org/p/<vendor>/<package>.json`.
 
 ## 6. Quality Assessment
 
@@ -205,6 +237,13 @@ The quality of license metadata across ecosystems varies widely, not only in ter
   - Some older packages may contain ambiguous or incomplete license data.
   - License references using `SEE LICENSE IN` depend on the correctness and inclusion of the referenced file in the published package.
 
+  ### PHP Ecosystem — Composer (Packagist)
+- **Coverage**: TBD
+- **Reliability**: Good. SPDX identifiers/expressions are first-class in `composer.json`, arrays have clear `OR` semantics, and `proprietary` is an explicit escape hatch. Validation via `composer/spdx-licenses` helps, but publication is not blocked for invalid values.
+- **Limitations**:
+  - Non-SPDX expressions can be published despite warnings.
+  - Some older packages may omit the `license` field or use nonstandard strings.
+
 ## 7. Transformation Requirements
 
 To make license information usable across ecosystems, processes must account for the different formats and locations where licenses are declared. The goal is to produce validated SPDX expressions from heterogeneous sources.
@@ -245,3 +284,10 @@ To make license information usable across ecosystems, processes must account for
 2. Extract the referenced license file from the published package tarball.
 3. Scan the file content with a license detection tool to map it to an SPDX identifier.
 4. Normalize the detected value into a validated SPDX expression.
+
+### PHP Ecosystem — Composer (Packagist)
+1. Read the `license` field from `composer.json`.
+   - If it contains a valid SPDX identifier or expression, parse and validate it directly. No further steps are required.
+   - If it contains the `proprietary` value, treat it as a closed-source package. The license terms must be obtained manually from the package’s website or vendor documentation, as no license file or metadata is expected in the code.
+2. If multiple identifiers are declared in an array, interpret them as an `OR` expression and normalize to a valid SPDX format.
+3. Validate the resulting SPDX expression using an SPDX parser.
