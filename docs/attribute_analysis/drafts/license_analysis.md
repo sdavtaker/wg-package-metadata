@@ -26,6 +26,15 @@ This section provides an overview of the ecosystems and package managers reviewe
 **License Information Available**: No
 **Reference**: [Dockerfile reference](https://docs.docker.com/engine/reference/builder/)
 
+### Go Ecosystem — Go Modules
+**License Information Available**: No dedicated `license` field in `go.mod`. License information is inferred from license files (e.g., `LICENSE`) present in the module’s source and redistributed module ZIP; `pkg.go.dev` detects licenses heuristically. There is no official module proxy or `go` CLI endpoint that returns structured license metadata. However, the [`go-licenses`](https://github.com/google/go-licenses) tool can be used to extract and map license data from module sources, though its coverage and accuracy depend on file placement and text heuristics.
+
+**References**:
+- [Go Modules Reference](https://go.dev/ref/mod) — Module format and proxy behavior.
+- [pkg.go.dev License Policy](https://pkg.go.dev/license-policy) — Heuristic detection and redistributable behavior, which mentions the internal catalog is build using [licensecheck](https://pkg.go.dev/github.com/google/licensecheck).
+- [Go module proxy protocol](https://golang.org/ref/mod#protocol) — Lists `.mod`, `.info`, and `.zip` endpoints, confirming absence of a license field.
+- Common tooling used in practice: [`licensecheck`](https://pkg.go.dev/golang.org/x/license) library and [`go-licenses`](https://github.com/google/go-licenses) CLI for detection and normalization.
+
 ## 3. Field Analysis
 
 This section groups ecosystems according to how license information can be specified in their package metadata. The focus here is on whether the declaration is unambiguous, ambiguous, or not supported at all, along with the types of definitions that are accepted in practice.
@@ -48,6 +57,15 @@ This section groups ecosystems according to how license information can be speci
   - Copy-paste of license text blocks
   - Historical community conventions where classifiers in `setup.py` or metadata loosely indicated license type
 - The presence of multiple valid formats and lack of strict validation means license information can be ambiguous.
+
+#### Go Ecosystem — Go Modules
+- **Accepted definitions**:
+  - License files such as `LICENSE` located in the module root or subdirectories.
+  - License text recognized heuristically by tools such as [`licensecheck`](https://pkg.go.dev/golang.org/x/license) or [`go-licenses`](https://github.com/google/go-licenses), which identify known license patterns in source files.
+- Go’s module tooling (`go` CLI, proxies, and `go.mod`) does not provide a structured field for declaring licenses.
+- The `.mod` and `.info` files available via the [module proxy protocol](https://go.dev/ref/mod#goproxy-protocol) contain only module and version metadata, not license information.
+- The [`pkg.go.dev`](https://pkg.go.dev/license-policy) service detects license information heuristically using [`licensecheck`](https://pkg.go.dev/golang.org/x/license).
+- Because license detection depends on the presence and content of files rather than explicit declarations, license metadata in Go modules is ambiguous and not consistently machine-readable.
 
 ### Unspecified
 
@@ -81,6 +99,13 @@ License metadata is not only expressed in different formats, but also stored in 
 - **Location**: Docker images do not embed license metadata. Any licensing information is external, typically shown in Docker Hub image descriptions or project documentation. Such information is not redistributed with the image itself, making it inaccessible for automated processing.
 - **Notes**: The lack of in-artifact metadata means license discovery depends entirely on community practices or external documentation.
 
+### Go Ecosystem — Go Modules
+- **Data type**: Text files containing license text, typically named `LICENSE`, or similar.
+- **License expression support**: Not supported. Go modules do not provide a field for SPDX identifiers or expressions in `go.mod` or related metadata.
+- **Location**: License files are distributed as part of the module source and included in the module zip file available through proxies (for example, `https://proxy.golang.org/<module>/@v/<version>.zip`).
+- The `.mod` file defines module dependencies but does not include licensing information. The `.info` file served by proxies contains version and timestamp metadata only, as defined in the [Go module proxy protocol](https://go.dev/ref/mod#goproxy-protocol).
+- **Notes**: License information must be derived from file scanning. Detection accuracy depends on file placement and adherence to standard license naming and text conventions.
+
 ## 5. Access Patterns
 
 Access to license metadata varies across ecosystems. Some make it directly available from the project source or distribution, while others rely on registry infrastructure or provide no access at all.
@@ -102,6 +127,12 @@ Access to license metadata varies across ecosystems. Some make it directly avail
 - **CLI access**: None. The `docker inspect` command surfaces image metadata, but license information is not among the supported attributes.
 - **Registry access**: License details, if provided, appear only in free-text descriptions on Docker Hub or other registries.
 - **API access**: Docker Hub APIs can return image descriptions, but they do not include a structured license field.
+
+### Go Ecosystem — Go Modules
+- **Direct access**: License information is available in the source repository or within the module zip file downloaded from a module proxy. The license files can be read directly from these sources.
+- **CLI access**: The `go` command does not provide a subcommand or flag to print license metadata.
+- **Registry access**: The [`pkg.go.dev`](https://pkg.go.dev) website displays heuristically detected license information and marks modules as redistributable or non-redistributable based on recognized licenses.
+- **API access**: The [module proxy protocol](https://go.dev/ref/mod#goproxy-protocol) serves `.mod`, `.zip`, and `.info` files but does not include license data. Programmatic license retrieval requires downloading the module source and scanning for license files.
 
 ## 6. Quality Assessment
 
@@ -129,6 +160,15 @@ The quality of license metadata across ecosystems varies widely, not only in ter
   - Registries like Docker Hub sometimes display licensing information in free-text descriptions, but this is inconsistent and not machine-readable.
   - Without structured metadata, automated compliance tooling cannot reliably determine licensing status.
 
+  ### Go Ecosystem — Go Modules
+- **Coverage**: TBD
+- **Reliability**: Weak. When conventional license files are used and remain unmodified, detection tools produce consistent results. Variations in file naming or content reduce accuracy.
+- **Limitations**:
+  - No structured license field in `go.mod` or module metadata.
+  - License discovery depends entirely on file scanning and heuristic matching.
+  - The [`pkg.go.dev`](https://pkg.go.dev/license-policy) classification can differ from results produced by local scanners, as it is based on an internal allowlist and redistributability policy.
+  - No official `go` CLI command provides license information (see [cmd/go reference](https://pkg.go.dev/cmd/go)).
+
 ## 7. Transformation Requirements
 
 To make license information usable across ecosystems, processes must account for the different formats and locations where licenses are declared. The goal is to produce validated SPDX expressions from heterogeneous sources.
@@ -154,3 +194,10 @@ To make license information usable across ecosystems, processes must account for
    - If found, scan the file with a license text identification tool to map it to SPDX.
    - Results will probably still be unreliable and incomplete, since no standard defines what the license of an image should represent.
 3. Normalize any extracted license names or text into SPDX identifiers, and validate using an SPDX expression parser.
+
+### Go Ecosystem — Go Modules
+1. Retrieve the module source or download the zip file from the module proxy.
+2. Identify license files at the module root or common subdirectories.
+3. Use a license scanner such as [`licensecheck`](https://pkg.go.dev/golang.org/x/license) or [`go-licenses`](https://github.com/google/go-licenses) to detect known license texts.
+4. Map detected results to SPDX identifiers where possible.
+5. Normalize multiple findings into an SPDX expression and validate with an SPDX parser.
