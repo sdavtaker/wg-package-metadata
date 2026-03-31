@@ -2,9 +2,11 @@
 
 This document provides implementation guidance for package manager developers on how to represent license metadata in a consistent, machine-readable way. It is intended for implementers adding or improving license support in a package registry or build tool. For background on how current ecosystems handle license metadata, see [license_analysis.md](license_analysis.md).
 
+Throughout this document, "the registry" refers to whatever system accepts and distributes packages — whether a centralized registry server or the build and packaging tooling in ecosystems without one.
+
 ## 1. General Recommendation
 
-Use a dedicated, singular `license` field (not `licenses`, not `licenseInfo`) whose value is a single **SPDX expression string**.
+Expose a dedicated, singular `license` field (not `licenses`, not `licenseInfo`) whose value is a single **SPDX expression string**.
 
 SPDX expressions handle all compound-license cases through built-in operators:
 
@@ -15,7 +17,7 @@ SPDX expressions handle all compound-license cases through built-in operators:
 | Both licenses apply (conjunctive) | `GPL-2.0-only AND MIT` |
 | License with exception | `GPL-2.0-only WITH Classpath-exception-2.0` |
 
-Do **not** use an array of strings for the field value. Arrays require consumers to guess whether the semantics are AND or OR, and they prevent the use of parenthesized sub-expressions or `WITH` clauses.
+Do **not** accept an array of strings for the field value. Arrays require consumers to guess whether the semantics are AND or OR, and they prevent the use of parenthesized sub-expressions or `WITH` clauses.
 
 **References:**
 - [SPDX License List](https://spdx.org/licenses/) — canonical identifiers for all common open-source licenses.
@@ -23,18 +25,19 @@ Do **not** use an array of strings for the field value. Arrays require consumers
 
 ## 2. Escape Hatch: Custom Licenses
 
-When a package uses a license that is not on the SPDX license list — for example, a bespoke proprietary license or a heavily modified OSI license — use the `LicenseRef-` prefix defined by the SPDX specification.
+When a package uses a license that is not on the SPDX license list — for example, a bespoke proprietary license or a heavily modified OSI license — the package manager must support a way for package publishers to express that license. This requires two things from the package manager:
 
-Two approaches are valid. Choose the one that better fits your package manager's existing data model.
+1. A syntactic mechanism to reference the custom license in the SPDX expression (the `LicenseRef-` prefix, defined by the SPDX specification).
+2. A way to resolve what that reference points to — i.e., the actual license text — so that consumers and tools can read it.
+
+Three approaches are valid. Choose the one that better fits your package manager's existing data model.
 
 ### Option A — Path as identifier
 
-Embed the relative file path directly in the `LicenseRef-` name. The path is resolved from the package root.
+In this approach, the package manager interprets the `LicenseRef-` suffix as a relative file path from the package root. For example, a publisher would write:
 
-```
-LicenseRef-LICENSE
-LicenseRef-licenses/custom.txt
-```
+- `LicenseRef-LICENSE` to reference the file at `/LICENSE`
+- `LicenseRef-licenses/custom.txt` to reference the file at `/licenses/custom.txt`
 
 A compound expression using this approach:
 
@@ -42,11 +45,13 @@ A compound expression using this approach:
 MIT AND LicenseRef-licenses/custom.txt
 ```
 
-**Tradeoffs:** Machine-resolvable without any additional metadata; simpler to implement. Expressions become longer and less readable as paths grow, and there is no short alias for the license.
+**Pros:** Machine-resolvable without any additional metadata; simpler to implement.
+
+**Cons:** Expressions become longer and less readable as paths grow, and there is no short alias for the license.
 
 ### Option B — Separate mapping field
 
-Use a short symbolic name in the expression and expose a separate field (e.g., `license_files`) that maps each `LicenseRef-` name to its relative path.
+In this approach, the package manager exposes a separate field (e.g., `license_files`) that maps each `LicenseRef-` name to its relative path. Publishers use short symbolic names in the expression.
 
 Expression:
 ```
@@ -62,18 +67,42 @@ Mapping field:
 }
 ```
 
-**Tradeoffs:** Produces shorter, more readable expressions. Requires additional validation to ensure every `LicenseRef-` name used in the expression has a corresponding entry in the mapping.
+**Pros:** Produces shorter, more readable expressions; allows a human-friendly alias.
 
-> **Note:** In both options, the referenced file must be present in the published package. Implementations should validate file presence regardless of which option is used.
+**Cons:** Requires additional validation to ensure every `LicenseRef-` name used in the expression has a corresponding entry in the mapping.
 
-### When to use custom LicenseRefs
+### Option C — Convention-based directory (REUSE approach)
 
-Use `LicenseRef-` only when:
-- The license is not present in the SPDX license list.
-- The license is proprietary or bespoke.
-- The license is a materially modified version of an OSI license that cannot be expressed with a `WITH` clause.
+In this approach, the package manager defines a conventional directory (e.g., `LICENSES/`) where custom license files are stored. Publishers use short symbolic names in the expression and place the corresponding license text at `LICENSES/<LicenseRef-name>.txt`.
 
-Do not use `LicenseRef-` as a workaround for licenses that are on the SPDX list but whose identifier you are uncertain of.
+Expression:
+```
+MIT AND LicenseRef-MyLicense
+```
+
+File location:
+```
+LICENSES/LicenseRef-MyLicense.txt
+```
+
+No separate mapping field is needed. The resolution rule is: look for a file named `<LicenseRef-name>.txt` (or `.md`) inside the package's `LICENSES/` directory. This approach is defined by the [REUSE specification](https://reuse.software/spec/).
+
+**Pros:** Short, readable expressions with no explicit mapping; resolution is predictable and convention-based.
+
+**Cons:** Requires the package manager to agree on and document the conventional directory name; less flexible if the ecosystem already uses a different layout convention.
+
+> **Note:** Package managers adopting Option A may also choose to standardise a base directory (e.g., always resolve paths relative to `LICENSES/`), effectively converging toward this convention.
+
+> **Note:** In all three options, the referenced file must be present in the published package. Implementations should validate file presence regardless of which option is used.
+
+### Scope of custom LicenseRefs
+
+The package manager should document — and where feasible, enforce — that `LicenseRef-` is intended only for:
+- Licenses not present in the SPDX license list.
+- Proprietary or bespoke licenses.
+- Materially modified versions of an OSI license that cannot be expressed with a `WITH` clause.
+
+Discourage publishers from using `LicenseRef-` as a workaround for licenses that are on the SPDX list but whose identifier they are uncertain of.
 
 ## 3. Validation Guidance
 
@@ -88,7 +117,10 @@ Reference implementations:
 Warn or reject when the value:
 - Is a bare string that is not a valid SPDX identifier or expression (e.g., `"gpl"`, `"BSD"`, `"GPL v2"`).
 - Contains multiple identifiers separated by commas, slashes, or spaces without SPDX operators.
-- References a `LicenseRef-` name (in Option B) that has no corresponding entry in the mapping field.
+- References a `LicenseRef-` name (in **Option B**) that has no corresponding entry in the mapping field. (In **Option C**, names are resolved by convention from the `LICENSES/` directory and do not require an explicit mapping.)
+- Uses a deprecated SPDX identifier (e.g., `GPL-2.0` instead of `GPL-2.0-only`, `LGPL-2.1` instead of `LGPL-2.1-only`). Treat as a warning and surface the current equivalent to the publisher.
+- Uses a `WITH` clause referencing an identifier that is not on the [SPDX exception list](https://spdx.org/licenses/exceptions-index.html). The expression parses successfully but is semantically invalid.
+- Is exactly `NOASSERTION` or `NONE`. These are valid escape hatches in full SPDX documents but are not valid SPDX expression syntax. If your package manager chooses to accept them as special field values (meaning "license could not be determined" and "no license applies" respectively), validate and display them separately from SPDX expressions, and make their semantics visible to consumers in the registry UI and API.
 
 Decide upfront whether validation failures are warnings or hard rejections, and communicate that policy clearly to package publishers. A warning-only policy is acceptable during a transition period; the long-term goal is hard rejection of invalid values.
 
@@ -104,7 +136,7 @@ Each stage requires a publicly committed date, set by the ecosystem maintainers.
 
 ### Stage 1 — Parallel support
 
-Accept both SPDX expressions and legacy formats in the `license` field. Do not reject packages for using the old format.
+The registry should accept both SPDX expressions and legacy formats in the `license` field. Do not reject packages for using the old format.
 
 Actions:
 - Publish documentation describing the SPDX format and the migration timeline.
@@ -123,7 +155,7 @@ Existing packages remain on their current metadata until updated.
 
 ### Stage 3 — Updated packages require SPDX (from date Y)
 
-From the announced date, any **update** to an existing package must include a valid SPDX `license` expression. Publishers who release a new version of a package that was previously using a legacy format must convert the field as part of the update.
+From the announced date, the registry should reject any **update** to an existing package that does not include a valid SPDX `license` expression. This means publishers releasing a new version of a package that was previously using a legacy format will need to convert the field as part of the update.
 
 ---
 
@@ -152,5 +184,6 @@ Communicate clearly that the migration window has closed. Any packages still car
 
 - [SPDX License List](https://spdx.org/licenses/)
 - [SPDX Expression Grammar (SPDX 2.3)](https://spdx.github.io/spdx-spec/v2.3/SPDX-license-expressions/)
+- [REUSE Specification](https://reuse.software/spec/) — convention for managing license information in projects
 - [license_analysis.md](license_analysis.md) — current-state analysis across ecosystems
 - [license_appendix.md](license_appendix.md) — supporting data and coverage statistics
